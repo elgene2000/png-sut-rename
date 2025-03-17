@@ -1,0 +1,10 @@
+requests
+python-dotenv
+Flask
+Flask-Cors
+oauthlib
+requests_oauthlib
+
+--extra-index-url https://mkmartifactory.amd.com/artifactory/api/pypi/hw-orc3pypi-prod-local/simple
+--trusted-host mkmartifactory.amd.com
+at-scale-python-api
