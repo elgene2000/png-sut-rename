@@ -51,7 +51,7 @@ class DatabaseController:
                 "last_page": response["last_page"],
             }
         else:
-            query_result = self._get_model_objs(response)
+            query_result = response
         return query_result
 
     def get(self, **kwargs) -> Union[models.Model, List[models.Model]]:

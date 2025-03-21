@@ -1,5 +1,7 @@
 import re
 import time
+import json
+import requests
 
 from utils.logger import logger
 from utils.maas import MAAS
@@ -30,12 +32,47 @@ if __name__ == "__main__":
 
     logger.info("System found")
 
+    system_id = system_data[0].get("id", "")
+    platform_config = system_data[0].get("platform_config", {})
+    power_controllers = platform_config.get("power_controllers", [])
+    platforms = system_data[0].get("platforms", {})
+    platform_name = platforms.get("name", "")
+
+    if "asrock" in platform_name.lower():
+        logger.info("Detected Asrock platform")
+        for power_controller in power_controllers:
+            if power_controller.get("type", "") == "bmc" and CURRENT_HOSTNAME.split(".")[0] in power_controller.get("ip", ""):
+                logger.info("Configuring BMC")
+                #REDFISH PATCH REQUEST
+                url = f"https://{power_controller["ip"]}/redfish/v1/Managers/Self/EthernetInterfaces/bond0"
+
+                username=power_controller["user"]
+                password=power_controller["pass"]
+
+                headers = {
+                    "Content-Type": "application/json",
+                    "If-Match": "*"
+                }
+
+                payload = {
+                    "HostName": f"bmc-{NEW_HOSTNAME.split('.')[0]}"
+                }
+
+                response = requests.patch(url, auth=(username, password), headers=headers, data=json.dumps(payload), verify=False)
+                power_controller["ip"] = "bmc-" + NEW_HOSTNAME.split(".")[0] + ".amd.com" if response.status_code == 202 else power_controller["ip"]
+                break
+    elif "splinter" in platform_name.lower():
+        pass
+
     logger.info("Updating on Conductor")
     response = SYSTEM_DATA_DB_CONTROLLER.update(
         dict(
-            id=system_data[0].id,
+            id=system_id,
             name=NEW_HOSTNAME.split(".")[0],
             hostname_ip=NEW_HOSTNAME,
+            platform_config = {
+                "power_controllers" : power_controllers
+            }
         )
     )
 
@@ -88,8 +125,6 @@ if __name__ == "__main__":
         if job_progress.get("result") == "SUCCESS":
             logger.info("Uninstalled SUT Auth Successfully")
             break
-
-        
         time.sleep(1)
 
 
