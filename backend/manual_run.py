@@ -17,13 +17,14 @@ NEW_HOSTNAME = ""
 if __name__ == "__main__":
     pattern = r"^[^.]+\..+$"
     if not re.match(pattern, NEW_HOSTNAME) or not re.match(pattern, CURRENT_HOSTNAME):
+        logger.error("Invalid hostname format")
         raise RuntimeError("Invalid hostname format")
 
     # ======================================================
     # CONDUCTOR UPDATE
     # Note: This section configures the hostname in Conductor
     # ======================================================
-    logger.info("Searching on Condutor")
+    logger.info("Searching on Conductor")
     system_data = SYSTEM_DATA_DB_CONTROLLER.query(hostname_ip=CURRENT_HOSTNAME)
 
     if not system_data:
@@ -104,7 +105,7 @@ if __name__ == "__main__":
     # JENKINS UNINSTALL
     # Note: This section uninstalls SUT Auth in Jenkins
     # ======================================================    
-    logger.info("Uninstalling SUT Auth")
+    logger.info("Uninstalling SUT Auth...")
     jenkins = Jenkins()
     TIMEOUT = 300
     uninstall_start_time = time.time()
@@ -148,7 +149,7 @@ if __name__ == "__main__":
     # JENKINS INSTALL
     # Note: This section reinstalls SUT Auth in Jenkins
     # ======================================================   
-    logger.info("Installing SUT Auth")
+    logger.info("Installing SUT Auth...")
     install_start_time = time.time()
 
     build_num = jenkins.install_sut_auth(NEW_HOSTNAME)
