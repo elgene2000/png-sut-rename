@@ -36,7 +36,7 @@ if __name__ == "__main__":
     system_id = system_data[0].get("id", "")
     system_username = system_data[0].get("username", "")
     platform_config = system_data[0].get("platform_config", {})
-    notes = platform_config.get("notes", {})
+    notes = platform_config.get("notes", "")
     power_controllers = platform_config.get("power_controllers", [])
     platforms = system_data[0].get("platforms", {})
     platform_name = platforms.get("name", "")
@@ -77,7 +77,8 @@ if __name__ == "__main__":
             pikvm_username = power_controller["user"]
             pikvm_password = power_controller["pass"]
             
-            notes.replace(power_controller["ip"], PIKVM_NEW_HOSTNAME + ".amd.com")
+            modified_note = notes.replace(power_controller["ip"], PIKVM_NEW_HOSTNAME + ".amd.com")
+            notes = modified_note
             
             try:
                 ssh = Paramiko(
@@ -103,7 +104,8 @@ if __name__ == "__main__":
             rpi_username = power_controller["user"]
             rpi_password = power_controller["pass"]
 
-            notes.replace(power_controller["ip"], RPI_NEW_HOSTNAME + ".amd.com")
+            modified_note = notes.replace(power_controller["ip"], RPI_NEW_HOSTNAME + ".amd.com")
+            notes = modified_note
 
             try:
                 ssh = Paramiko(
